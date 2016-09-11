@@ -6,7 +6,7 @@
 
 * Need support for both explicit dependency listings and dependency discovery
     * Explicit listings can be done with a decorator, mapping world.x to dicts of extra arguments
-#    * Dependency discovery should
+    * Dependency discovery should cover anything missing in the explicit listings
 """
 import scipy as sp
 import pandas as pd
@@ -14,9 +14,10 @@ from distributed import Executor, local_executor
 
 class World(object):
 
-    def __init__(self, start, end):
+    def __init__(self, start, end, distributed=True):
         self._start = start
         self._end = end
+        self._distributed = distributed
     
     def prices(self):
         
