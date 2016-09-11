@@ -10,7 +10,7 @@
 """
 import scipy as sp
 import pandas as pd
-from distributed import Executor
+from distributed import Executor, local_executor
 
 class World(object):
 
@@ -18,11 +18,18 @@ class World(object):
         self._start = start
         self._end = end
     
-    def get_data(self):
-        sp.random.seed(591989)
-        dates = pd.date_range('2000', '2017', freq='D')
-        data = pd.Series(sp.random.normal(size=len(dates)), dates)
-        return data.loc[self._start:self._end]
+    def prices(self):
+        
+        def f(s, e):
+            sp.random.seed(591989)
+            dates = pd.date_range('2000', '2017', freq='D')
+            data = pd.Series(sp.random.normal(size=len(dates)), dates)
+            return data.loc[s:e]
+
+        with local_executor() as e:
+            return e.submit(f, self._start, self._end).result()
+            
+        return 
 
 def get_chunks(start, end, count, warmup=7):
     dates = pd.date_range(pd.to_datetime(start), end)
@@ -31,9 +38,8 @@ def get_chunks(start, end, count, warmup=7):
                     for i in range(0, len(dates), size)]
     return chunks
 
-def f(w):
-    data = w.get_data()
-    return data.ewm(halflife=30).mean()
+def backtest_chunk(world):
+    return world.prices().ewm(halflife=30).mean()
 
 def run():
     start, end = '2000', '2016'
@@ -44,8 +50,8 @@ def run():
     
     results = []
     for s, e in get_chunks(start, end, count, warmup):
-        w = World(s, e)
-        result = client.submit(f, w)
+        world = World(s, e)
+        result = client.submit(backtest_chunk, world)
         results.append(result)
     
     results = [r.result() for r in results]
