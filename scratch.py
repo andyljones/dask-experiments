@@ -56,3 +56,7 @@ def run():
         results.append(result)
     
     results = [r.result() for r in results]
+
+
+from dask import delayed as delayed_
+def delayed
