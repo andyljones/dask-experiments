@@ -1,0 +1,20 @@
+#cloud-config
+
+package_upgrade: true
+
+packages:
+   - wget
+   - tar
+   - bzip2
+   - ca-certificates
+   - libXext
+   - libSM
+   - libXrender
+
+runcmd:
+   - "wget -O /tmp/Miniconda.sh --quiet https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+   - "/bin/bash /tmp/Miniconda.sh -b -p /opt/conda"
+   - "export PATH=opt/conda/bin:$PATH"
+   - "conda install dask distributed -y -c conda-forge"
+   - "rm -rf /mnt/conda-repo"
+   - "nohup dask-scheduler --bokeh-port 80 --port 8785"
