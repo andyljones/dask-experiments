@@ -13,6 +13,8 @@ import boto3
 import subprocess
 
 KEYPAIR = 'andyljones-key-pair-us-east-1'
+SSH_GROUP = 'andyljones-ssh'
+MUTUAL_ACCESS_GROUP = 'mutual-access-1'
 
 EC2 = boto3.resource('ec2')
 
@@ -33,7 +35,7 @@ def create_instance(name, config):
                                 MaxCount=1, 
                                 KeyName=KEYPAIR,
                                 UserData=config,
-                                SecurityGroups=['andyljones-ssh', 'mutual-access-1'],
+                                SecurityGroups=[SSH_GROUP, MUTUAL_ACCESS_GROUP],
                                 InstanceType='t2.small')
 
 def set_name(instance, name):
