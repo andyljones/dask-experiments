@@ -6,6 +6,7 @@ Created on Sat Nov 12 17:01:14 2016
 @author: andyjones
 """
 
+import shlex
 import distributed
 import yaml
 import boto3
@@ -73,6 +74,22 @@ def create_tunnel(public_dns_name, local_port, remote_port):
     key_pair = KEYPAIR + '.pem'
     return subprocess.Popen(['ssh', '-i', key_pair, '-N', '-L', tunnel, destination])
         
+
+def run_command(client, command, timeout=60, **kwargs):
+    args = shlex.split(command)
+    def f():
+        import subprocess
+        try:
+            return subprocess.check_output(args, stderr=subprocess.STDOUT, timeout=timeout)
+        except subprocess.CalledProcessError as e:
+            return b'EXIT CODE: ' + bytes(e.returncode) + b'\n\n' + e.output
+            
+    results = client.run(f, nanny=True, **kwargs)
+    for k, v in results.items():
+        print('\n\n' + k + ':\n')
+        print(v.decode())
+               
+    
 def run():
     scheduler = get_or_create_scheduler()
     workers = get_or_create_workers()
