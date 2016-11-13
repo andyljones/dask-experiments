@@ -9,24 +9,24 @@
  * Set up a default configuration by calling `aws configure`. Pass it the ID and secret you got when creating the 'ec2-admin' user. Set the default region to whatever the default region for the key pair was (probably us-east).
  * Install boto3 with `conda install boto3`
  * Install dask.distributed with `conda install distributed -c conda-forge`
- * Start an ipython console and `from scratch import *`. 
- * Create a dask.distributed scheduler and worker using
+ * Start an ipython console and run `from scratch import *`. 
+ * From the ipython console, start a dask.distributed scheduler and worker using
  
- ```
+ ```python
  scheduler = get_or_create_scheduler()
  workers = get_or_create_workers()
  ```
  
  * Establish SSH tunnels to both the scheduler and the scheduler's webpage using
  
- ```
+ ```python
  scheduler_tunnel = create_tunnel(scheduler.public_dns_name, '8785', '8785')
  http_tunnel = create_tunnel(scheduler.public_dns_name, '2000', '80')
  ```
  
  * Then you can submit work using 
  
-```
+```python
 client = distributed.Client('127.0.0.1:8785')
 future = client.submit(lambda: return 'hello world!')
 print(future.result())
